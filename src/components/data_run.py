@@ -16,7 +16,7 @@ class DataFinal:
             df = pd.DataFrame()
             idx = 0
             for index, row in final_df.iterrows():
-                if row.isnull().all():
+                if (row == 0).all():
                     test_df = data_obj.total_numbers(final_df.loc[idx:index-1])
                     idx = index+1
                     df = pd.concat([df, test_df])
@@ -29,7 +29,7 @@ class DataFinal:
             buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
             buy_back['copy_paste'] = buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
 
-            data_export(to_send, buy_back)
+            # data_export(to_send, buy_back)
 
             return to_send, buy_back
         
