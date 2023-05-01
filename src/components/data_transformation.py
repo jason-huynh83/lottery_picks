@@ -1,32 +1,54 @@
 from src.exception import CustomException
 from src.logger import logging
-import os
 import pandas as pd
 import numpy as np
+import sys
 
 
 class DataTransformation:
     def __init__(self):
         pass
-    
-    def text_to_df(self, file_name):
 
+    def add_totals(self, df_running, df):
+
+        logging.info("Entered Data Transformation - adding totals")
         try:
-            nums = []
-            bets = []
-            with open(file_name, 'r') as file:
-                for line in file:
-                    all_nums = line.replace('-', ' ').replace('$', ' ').replace('.', ' ').replace(':',' ').replace('=', ' ').replace(',', ' ')
-                    nums.append(all_nums.strip().split(' ')[:-1])
-                    bets.append(all_nums.strip().split(' ')[-1].strip())
+            df_running['bet'] = df_running['bet'].apply(lambda x: int(x))
+            buy_backs_3n = df_running[~(df_running[1].isnull()) & (df_running['bet']>40)]
+            buy_backs_bs = df_running[(df_running[1].isnull()) & (df_running['bet']>80)]
 
-            df1 = pd.DataFrame(nums)
-            final_df = pd.concat([df1, pd.Series(bets, name='bet')], axis=1)
-            final_df = final_df.replace({None:np.nan}).replace({'':np.nan}).replace({' ':np.nan})
-            final_df.loc[1000] = np.nan
+            buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
+            buy_backs['bet'] = buy_backs['bet'].apply(lambda x: x-40)
+            
+            df.loc['Buy Back'] = [-buy_backs[buy_backs[1].isnull()]['bet'].sum(), -buy_backs[~buy_backs[1].isnull()]['bet'].sum()]
+            bs_total = df['bs'].sum() * 0.13
+            n_total = df['3n'].sum() * 0.30
+            
+            df.loc['Total'] = df.sum()
+            df.loc['Total - 13%/30%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
+            df.loc['final_total'] = [np.nan, df.loc['Total - 13%/30%', 'bs'] + df.loc['Total - 13%/30%', '3n']]
 
-            return final_df
+            return df, buy_backs
         
-        except:
+        except Exception as e:
+            raise CustomException(e, sys)
+        
+    def total_numbers(self, df):
+        logging.info("Data Ingestion Complete")
+        logging.info("Entered Data Transformation - totaling numbers")
+        try:
+            df1 = pd.DataFrame()
+            df['bet'] = df['bet'].astype(int)
+            
+            totals_dict = {'bs':df[df[1].isnull()]['bet'].sum(),
+                        '3n':df[~df[1].isnull()]['bet'].sum()}
+            
+            totals_df = pd.DataFrame(totals_dict, index=[0])
+            
+            df_totals = pd.concat([df1, totals_df], ignore_index=True)
+            
+            return df_totals 
+        
+        except Exception as e:
             raise CustomException(e, sys)
     
