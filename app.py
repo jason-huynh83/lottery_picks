@@ -2,7 +2,8 @@ import streamlit as st
 from src.components.data_ingestion import DataIngestion
 from src.components.data_run import DataFinal
 import streamlit as st
-import datetime
+from datetime import datetime
+import pytz
 
 @st.cache_data
 def convert_df(df):
@@ -10,7 +11,8 @@ def convert_df(df):
     return df.to_csv().encode('utf-8')
 
 def main():
-    today = datetime.datetime.today()
+    tz = pytz.timezone('US/Eastern')
+    today = datetime.now(tz)
     today_str = today.strftime('%B-%d-%Y')
     st.title(f"Uncle Kevin Lotto App: {today_str}")
     
@@ -18,7 +20,7 @@ def main():
     user_input = st.text_area("Enter lotto bets here:", value='copy & paste here')
     
     data_ingestion_obj = DataIngestion('numbers.txt')
-    data = data_ingestion_obj.text_to_df_2(user_input)
+    data = data_ingestion_obj.text_to_df(user_input)
     df_final = DataFinal()
     to_send, buy_backs = df_final.data_main(data)
 
