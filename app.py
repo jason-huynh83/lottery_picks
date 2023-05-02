@@ -18,7 +18,7 @@ def main():
     
     # Text area for user input
     user_input = st.text_area("Enter lotto bets here:", value='copy & paste here')
-    
+
     data_ingestion_obj = DataIngestion('numbers.txt')
     data = data_ingestion_obj.text_to_df(user_input)
     df_final = DataFinal()
