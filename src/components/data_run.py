@@ -27,9 +27,10 @@ class DataFinal:
             final_df1 = final_df[~final_df[0].isnull()]
 
             to_send, buy_back = data_obj.add_totals(final_df1, df)
+            buy_back = buy_back.replace(0,'')
             buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
             buy_back['copy_paste'] = buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
-
+            
             # data_export(to_send, buy_back)
 
             return to_send, buy_back
