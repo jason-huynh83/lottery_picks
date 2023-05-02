@@ -12,7 +12,7 @@ def convert_df(df):
 def main():
     today = datetime.datetime.today()
     today_str = today.strftime('%B-%d-%Y')
-    st.title(f"Uncle Kevin App: {today_str}")
+    st.title(f"Uncle Kevin Lotto App: {today_str}")
     
     # Text area for user input
     user_input = st.text_area("Enter lotto bets here:", value='copy & paste here')
