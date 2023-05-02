@@ -39,7 +39,6 @@ class DataTransformation:
         try:
             df1 = pd.DataFrame()
             df['bet'] = df['bet'].astype(int)
-            
             totals_dict = {'bs':df[df[1]==0]['bet'].sum(),
                         '3n':df[df[1]!=0]['bet'].sum()}
             

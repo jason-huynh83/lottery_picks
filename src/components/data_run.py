@@ -15,6 +15,7 @@ class DataFinal:
             data_obj = DataTransformation()
             df = pd.DataFrame()
             idx = 0
+       
             for index, row in final_df.iterrows():
                 if (row == 0).all():
                     test_df = data_obj.total_numbers(final_df.loc[idx:index-1])

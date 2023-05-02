@@ -17,7 +17,15 @@ def main():
     st.title(f"Uncle Kevin Lotto App: {today_str}")
     
     # Text area for user input
-    user_input = st.text_area("Enter lotto bets here:", value='copy & paste here', height = 400)
+    user_input = st.text_area("Enter lotto bets here:", 
+                              value="""text1
+1,2,3-$30
+1,2,3$50
+text2
+4,5,6-$50
+7,8,9-$50
+"""
+    , height = 400)
 
     data_ingestion_obj = DataIngestion('numbers.txt')
     data = data_ingestion_obj.text_to_df(user_input)

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import warnings
 from src.components.data_run import DataFinal
 from io import StringIO
+import re
 warnings.filterwarnings('ignore')
 
 class DataIngestion:
@@ -17,16 +18,31 @@ class DataIngestion:
     def text_to_df(self, text_area):
         logging.info("Start of data ingestion")
         try:
-            nums = []
-            bets = []
+            # nums = []
+            # bets = []
             
             text_data = StringIO(text_area)
             df = pd.read_csv(text_data, delimiter="\t", header=None)
             
+            # for idx, row in df.iterrows():
+            #     all_nums = row[0].replace('-', ' ').replace('$', ' ').replace('.', ' ').replace(':',' ').replace('=', ' ').replace(',', ' ')
+            #     nums.append(all_nums.strip().split(' ')[:-1])
+            #     bets.append(all_nums.strip().split(' ')[-1].strip())
+
+            integers =[]
             for idx, row in df.iterrows():
-                all_nums = row[0].replace('-', ' ').replace('$', ' ').replace('.', ' ').replace(':',' ').replace('=', ' ').replace(',', ' ')
-                nums.append(all_nums.strip().split(' ')[:-1])
-                bets.append(all_nums.strip().split(' ')[-1].strip())
+                numbers=re.findall(r'\d+', row[0])
+                integers.append(numbers)
+
+            nums = []
+            bets = []
+            for lotto in integers:
+                if len(lotto) > 0:
+                    nums.append(lotto[:-1])
+                    bets.append(lotto[-1])
+                else:
+                    nums.append([0])
+                    bets.append('')
 
             df1 = pd.DataFrame(nums)
             final_df = pd.concat([df1, pd.Series(bets, name='bet')], axis=1)
