@@ -19,8 +19,8 @@ class DataIngestion:
         logging.info("Start of data ingestion")
         
         try:
-            
             text_data = StringIO(text_area)
+            print(len(text_data.getvalue()))
             if len(text_data.getvalue()) > 0:
                
                 df = pd.read_csv(text_data, delimiter="\t", header=None)
