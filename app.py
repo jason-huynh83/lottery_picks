@@ -38,7 +38,7 @@ text2
     if st.button("Submit"):
         # Do something with the user input
         df_final = DataFinal()
-        to_send, buy_backs = df_final.data_main(data)
+        to_send = df_final.data_main(data)
         st.dataframe(to_send, use_container_width=True)
         csv = convert_df(to_send)
         
@@ -48,9 +48,9 @@ text2
             file_name=f"{today_str}.csv",
             mime='text/csv',
         )
-        st.write('Buy Back Numbers:')
-        for row in buy_backs['copy_paste']:
-            st.write(row)
+        # st.write('Buy Back Numbers:')
+        # for row in buy_backs['copy_paste']:
+        #     st.write(row)
 
 
 if __name__ == "__main__":
