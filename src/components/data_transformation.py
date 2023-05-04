@@ -19,7 +19,7 @@ class DataTransformation:
             # buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
             # buy_backs['bet'] = buy_backs['bet'].apply(lambda x: x-40)
             # df.loc['Buy Back'] = [-buy_backs[buy_backs[1]==0]['bet'].sum(), -buy_backs[buy_backs[1]!=0]['bet'].sum()]
-            
+
             bs_total = df['bs'].sum() * 0.10
             n_total = df['3n'].sum() * 0.20
             
@@ -38,12 +38,20 @@ class DataTransformation:
         try:
             df1 = pd.DataFrame()
             df['bet'] = df['bet'].astype(int)
-            totals_dict = {'bs':df[df[1]==0]['bet'].sum(),
-                        '3n':df[df[1]!=0]['bet'].sum()}
             
-            totals_df = pd.DataFrame(totals_dict, index=[0])
+            if len(df.columns) > 2:
+                totals_dict = {'bs':df[df[1]==0]['bet'].sum(),
+                            '3n':df[df[1]!=0]['bet'].sum()}
+                
+                totals_df = pd.DataFrame(totals_dict, index=[0])
+                
+                df_totals = pd.concat([df1, totals_df], ignore_index=True)
             
-            df_totals = pd.concat([df1, totals_df], ignore_index=True)
+            else:
+                totals_dict = {'bs':df['bet'].sum()}
+                totals_df = pd.DataFrame(totals_dict, index=[0])
+                df_totals = pd.concat([df1, totals_df], ignore_index=True)
+                df_totals['3n'] = 0
             
             return df_totals 
         
