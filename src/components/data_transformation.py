@@ -16,11 +16,10 @@ class DataTransformation:
             df_running['bet'] = df_running['bet'].apply(lambda x: int(x))
             # buy_backs_3n = df_running[~(df_running[1]==0) & (df_running['bet']>40)]
             # buy_backs_bs = df_running[(df_running[1]==0) & (df_running['bet']>80)]
-
             # buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
             # buy_backs['bet'] = buy_backs['bet'].apply(lambda x: x-40)
-            
             # df.loc['Buy Back'] = [-buy_backs[buy_backs[1]==0]['bet'].sum(), -buy_backs[buy_backs[1]!=0]['bet'].sum()]
+            
             bs_total = df['bs'].sum() * 0.10
             n_total = df['3n'].sum() * 0.20
             

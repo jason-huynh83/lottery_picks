@@ -17,7 +17,6 @@ class DataIngestion:
         
     def text_to_df(self, text_area):
         logging.info("Start of data ingestion")
-        
         try:
             text_data = StringIO(text_area)
             if len(text_data.getvalue()) > 0:
