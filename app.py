@@ -52,6 +52,5 @@ text2
         # for row in buy_backs['copy_paste']:
         #     st.write(row)
 
-
 if __name__ == "__main__":
     main()
