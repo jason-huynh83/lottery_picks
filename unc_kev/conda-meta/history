@@ -11,3 +11,16 @@
 +defaults/win-64::vs2015_runtime-14.27.29016-h5e58377_2
 +defaults/win-64::wheel-0.38.4-py38haa95532_0
 # update specs: ['python==3.8']
+==> 2023-06-27 19:53:41 <==
+# cmd: C:\Users\jason\anaconda3\Scripts\conda-script.py install -c anaconda lxml
+# conda version: 23.3.1
+-defaults/win-64::ca-certificates-2023.01.10-haa95532_0
+-defaults/win-64::openssl-1.1.1t-h2bbff1b_0
++anaconda/win-64::ca-certificates-2023.01.10-haa95532_0
++anaconda/win-64::libiconv-1.16-h2bbff1b_2
++anaconda/win-64::libxml2-2.9.14-h0ad7f3c_0
++anaconda/win-64::libxslt-1.1.35-h2bbff1b_0
++anaconda/win-64::lxml-4.9.1-py38h1985fb9_0
++anaconda/win-64::openssl-1.1.1s-h2bbff1b_0
++anaconda/win-64::zlib-1.2.13-h8cc25b3_0
+# update specs: ['lxml']
