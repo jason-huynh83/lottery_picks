@@ -38,12 +38,12 @@ def check_winning_nums(df, winning_nums, bs):
                 if len(common) >= 3:
                     df.loc[idx, 'win_or_lose'] = 'W'
                 
-                elif row.count() == 2:
-                    betting_nums = row.dropna()[:-1].tolist()
-                    betting_nums = [int(num) for num in betting_nums]
-
-                    if betting_nums[0] == bs:
-                        df.loc[idx, 'win_or_lose'] = 'W'
+            elif row.count() == 2:
+                betting_nums = row.dropna()[:-1].tolist()
+                betting_nums = [int(num) for num in betting_nums]
+                
+                if betting_nums[0] == bs:
+                    df.loc[idx, 'win_or_lose'] = 'W'
 
         if 'win_or_lose' in df.columns:
             return df[~df['win_or_lose'].isnull()]
@@ -88,7 +88,8 @@ def scrape_winning_nums(lotto):
             date, winning_nums, bs = extract_nums(max)
             
         winning_nums = [int(num) for num in winning_nums]
-            
+        bs = int(bs)
+        
         return date, winning_nums, bs
              
 
