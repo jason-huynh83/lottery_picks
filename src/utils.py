@@ -37,6 +37,14 @@ def check_winning_nums(df, winning_nums, bs):
                     
                 if len(common) >= 3:
                     df.loc[idx, 'win_or_lose'] = 'W'
+                   
+                # checking for 2.5 win 
+                elif len(common) == 2:
+                    # convert to float
+                    row_values = [float(value) for value in row]
+                    # check if bonus number in bets
+                    if bs in row_values:
+                        df.loc[idx, 'win_or_lose'] = 'W (2.5)'
                 
             elif row.count() == 2:
                 betting_nums = row.dropna()[:-1].tolist()
