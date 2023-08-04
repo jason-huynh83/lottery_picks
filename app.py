@@ -133,6 +133,5 @@ text2
 if __name__ == "__main__":
     main()
     st.subheader("Check Winning Numbers")
-    winning_numbers()
+    #winning_numbers()
     main_2()
-
