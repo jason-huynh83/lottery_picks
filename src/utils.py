@@ -4,6 +4,8 @@ import datetime
 import sys
 import pandas as pd
 import numpy as np
+import requests
+from bs4 import BeautifulSoup
 
 def data_export(to_send, buy_back):
         logging.info("Data Main is complete")
@@ -63,12 +65,29 @@ def check_winning_nums(df, winning_nums, bs):
         raise CustomException(e, sys)
     
 
-def extract_nums(game):
+def extract_nums(url):
     
-    date = game.iloc[1, 0]
-    all_nums = game.iloc[1, 1].split('-')
-    winning_nums = all_nums[:-1]
-    bs = all_nums[-1]
+    # Send a GET request to the website and retrieve the HTML content
+    response = requests.get(url)
+
+    # Create a BeautifulSoup object to parse the HTML
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # Find the container div that contains the date
+    container = soup.find("div", class_='column is-6 lg-date has-text-right')
+
+    numbers = soup.find("div", class_='column is-12 lg-center-flex')
+
+    date = container.text.strip().replace('\n','').split()
+    date = ' '.join(date)
+
+    nums = numbers.find_all('li', class_='lg-number')
+    nums_list = [] 
+    for num in nums:
+        nums_list.append(num.text)
+        
+    winning_nums = nums_list[:-1]
+    bs = nums_list[-1]
     
     return date, winning_nums, bs
 
@@ -77,23 +96,19 @@ def scrape_winning_nums(lotto):
     logging.info("Scraping Winning Numbers")
     logging.info("Entered scraping winning numbers")
     try:
-        md_url = 'https://www.lottostrategies.com/cgi-bin/winning_of_past_month/100/ONM/ON/Ontario-ON-Mega-Dice-lottery-results.html'
-        dg_url = 'https://www.lottostrategies.com/cgi-bin/winning_of_past_month/100/206/ON/Ontario-ON-Daily-Grand-lottery-results.html'
-        six_four_url = 'https://www.lottostrategies.com/cgi-bin/winning_of_past_month/100/201/ON'
-        max_url = 'https://www.lottostrategies.com/cgi-bin/winning_of_past_month/100/203/ON/Ontario-ON-Lotto-Max-lottery-results.html'
+        md_url = 'https://lotteryguru.com/canada-lottery-results/ca-mega-dice/ca-mega-dice-results-history'
+        dg_url = 'https://lotteryguru.com/canada-lottery-results/ca-daily-grand/ca-daily-grand-results-history'
+        six_four_url = 'https://lotteryguru.com/canada-lottery-results/ca-lotto-6-49/ca-lotto-6-49-results-history'
+        max_url = 'https://lotteryguru.com/canada-lottery-results/ca-lotto-max/ca-lotto-max-results-history'
 
         if lotto == 'Megadice':
-            md = pd.read_html(md_url)[1]
-            date, winning_nums, bs = extract_nums(md)
+            date, winning_nums, bs = extract_nums(md_url)
         elif lotto == 'Daily Grand':
-            dg = pd.read_html(dg_url)[1]
-            date, winning_nums, bs = extract_nums(dg)
+            date, winning_nums, bs = extract_nums(dg_url)
         elif lotto == 'Lotto 6/49':
-            six = pd.read_html(six_four_url)[1]
-            date, winning_nums, bs = extract_nums(six)
+            date, winning_nums, bs = extract_nums(six_four_url)
         else:
-            max = pd.read_html(max_url)[1]
-            date, winning_nums, bs = extract_nums(max)
+            date, winning_nums, bs = extract_nums(max_url)
             
         winning_nums = [int(num) for num in winning_nums]
         bs = int(bs)

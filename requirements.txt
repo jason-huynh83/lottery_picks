@@ -5,4 +5,5 @@ matplotlib
 streamlit
 openpyxl
 lxml
+bs4
 -e .

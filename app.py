@@ -100,11 +100,6 @@ text2
 def winning_numbers():
     lotto_names = ['Megadice','Daily Grand','Lotto 6/49', 'Lotto Max']
     selected_lotto = st.selectbox('Choose Lotto', lotto_names)
-    date, winning_nums, bs = scrape_winning_nums(selected_lotto)
-    
-    st.write(date)
-    st.write(', '.join(str(num) for num in winning_nums) + ' bonus ' + str(bs))
-    # st.write(str(', '.join(winning_nums)) + ' bonus ' + str(bs))
     user_input = st.text_area("Enter numbers to check here:", 
                               placeholder="""Please follow format:
 text1
@@ -122,16 +117,14 @@ text2
 
     # Submit button
     if st.button("Check"):
-        
+        date, winning_nums, bs = scrape_winning_nums(selected_lotto)
+        st.write(date)
+        st.write(', '.join(str(num) for num in winning_nums) + ' bonus ' + str(bs))
         winners = check_winning_nums(data, winning_nums, bs)
         st.write(winners)
 
-    
-
-
-
 if __name__ == "__main__":
     main()
-    # st.subheader("Check Winning Numbers")
-    # winning_numbers()
+    st.subheader("Check Winning Numbers")
+    winning_numbers()
     main_2()
