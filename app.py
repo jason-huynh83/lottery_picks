@@ -78,7 +78,7 @@ text2
         
     # Submit button
     if st.button("Enter"):
-        # Do something with the user input
+    
         df_final = DataFinal()
         to_send, buy_backs = df_final.data_main_2(data)
        
