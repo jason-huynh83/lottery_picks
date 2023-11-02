@@ -45,7 +45,7 @@ def check_winning_nums(df, winning_nums, bs):
                     # convert to float
                     row_values = [float(value) for value in row]
                     # check if bonus number in bets
-                    if bs in row_values:
+                    if bs in row_values[:-1]:
                         df.loc[idx, 'win_or_lose'] = 'W (2.5)'
                         
                     elif sum(1 for x in row_values if x == x) == 3:
