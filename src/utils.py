@@ -59,7 +59,8 @@ def check_winning_nums(df, winning_nums, bs):
                     df.loc[idx, 'win_or_lose'] = 'W'
 
         if 'win_or_lose' in df.columns:
-            return df[~df['win_or_lose'].isnull()]
+            return df[(df['win_or_lose'] == 'W') | (df['win_or_lose'] == 'W (2.5)') | (df['win_or_lose'] == '2 number Win')]
+            # return df[~df['win_or_lose'].isnull()]
         
         else:
             return 'No winner'
