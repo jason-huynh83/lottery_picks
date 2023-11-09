@@ -38,7 +38,8 @@ def check_winning_nums(df, winning_nums, bs):
                 common = set1.intersection(set2)
                     
                 if len(common) >= 3:
-                    df.loc[idx, 'win_or_lose'] = 'W'
+                    if row[:-1].count() == len(common):
+                        df.loc[idx, 'win_or_lose'] = 'W'
                    
                 # checking for 2.5 win 
                 elif len(common) == 2:
