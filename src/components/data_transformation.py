@@ -38,11 +38,11 @@ class DataTransformation:
         try:
             df_running['bet'] = df_running['bet'].apply(lambda x: int(x))
         
-            buy_backs_3n = df_running[~(df_running[1]==0) & (df_running['bet']>80)]
-            buy_backs_bs = df_running[(df_running[1]==0) & (df_running['bet']>160)]
+            buy_backs_3n = df_running[~(df_running[1]==0) & (df_running['bet']>50)]
+            buy_backs_bs = df_running[(df_running[1]==0) & (df_running['bet']>100)]
             
-            buy_backs_3n['bet'] = buy_backs_3n['bet'].apply(lambda x: x-80)
-            buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-160)
+            buy_backs_3n['bet'] = buy_backs_3n['bet'].apply(lambda x: x-50)
+            buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-100)
             
             buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
             # buy_backs['bet'] = buy_backs['bet'].apply(lambda x: x-80)
