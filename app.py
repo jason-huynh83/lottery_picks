@@ -120,7 +120,7 @@ text2
     data_ingestion_obj = DataIngestion('numbers.txt')
     data = data_ingestion_obj.text_to_df(user_input)
     
-    col1, col2 = st.columns([1,7])
+    col1, col2, col3 = st.columns([1,1,2])
 
     
     if col1.button("Submit", key="submit_button"):
@@ -156,7 +156,25 @@ text2
         st.text('bonus')
         for row in rearr_df['copy_paste']:
             st.text(row)
-
+            
+    # Rearrange button
+    if col3.button("Only Bonus", key="bonus_button"):
+        
+        
+        bonus_df = data[data.index != 1000]
+        bonus_df = bonus_df[bonus_df[1] ==0]
+        bonus_df[0] = bonus_df[0].astype(int)
+        bonus_df['bet'] = bonus_df['bet'].astype(int)
+        
+        bonus_df = bonus_df.groupby(0)['bet'].sum().reset_index()
+        bonus_df = bonus_df.sort_values(by=0, ascending=True)
+        
+        bonus_df['copy_paste'] = bonus_df[[0,'bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
+        
+        st.text('bonus')
+        for row in bonus_df['copy_paste']:
+            st.text(row)
+            
     return data
 
 def winning_numbers():
