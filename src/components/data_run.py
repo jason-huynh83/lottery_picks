@@ -39,7 +39,7 @@ class DataFinal:
         except Exception as e:
             raise CustomException(e, sys)
         
-    def data_main_2(self, final_df):
+    def data_main_2(self, final_df, buy_back_bonus, buy_back_3n):
         logging.info("Data Transformation is complete")
         logging.info("Entered DataFinal - data_main")
         try:
@@ -59,9 +59,9 @@ class DataFinal:
 
             
             if len(final_df1.columns) > 2:
-                to_send, buy_back = data_obj.add_totals_2(final_df1, df)
+                to_send, buy_back = data_obj.add_totals_2(final_df1, df, buy_back_bonus, buy_back_3n)
             else:
-                to_send, buy_back = data_obj.add_total_bs(final_df1, df)
+                to_send, buy_back = data_obj.add_total_bs(final_df1, df, buy_back_bonus)
 
             buy_back = buy_back.replace(0,'')
             buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)

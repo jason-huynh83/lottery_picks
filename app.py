@@ -75,12 +75,22 @@ text2
 
     data_ingestion_obj = DataIngestion('numbers.txt')
     data = data_ingestion_obj.text_to_df(user_input)
-        
+    
+    # Using Streamlit's column layout
+    col1, col2 = st.columns(2)
+
+    # Adding number input widgets in the columns
+    with col1:
+        buy_back_bonus = st.number_input('Buy Back Bonus', value=100)
+
+    with col2:
+        buy_back_3n = st.number_input('Buy Back 3n', value=50)
+
     # Submit button
     if st.button("Enter"):
     
         df_final = DataFinal()
-        to_send, buy_backs = df_final.data_main_2(data)
+        to_send, buy_backs = df_final.data_main_2(data, buy_back_bonus, buy_back_3n)
        
         st.dataframe(to_send, use_container_width=True)
         csv = convert_df(to_send)

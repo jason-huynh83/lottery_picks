@@ -32,7 +32,7 @@ class DataTransformation:
         except Exception as e:
             raise CustomException(e, sys)
         
-    def add_totals_2(self, df_running, df):
+    def add_totals_2(self, df_running, df, buy_back_bonus, buy_back_3n):
         logging.info("Entered Data Transformation - adding totals")
         try:
             df_running['bet'] = df_running['bet'].apply(lambda x: int(x))
@@ -42,11 +42,11 @@ class DataTransformation:
             
             # df_running_bs = df_running_bs.groupby(0).sum().reset_index()
 
-            buy_backs_3n = df_running_3n[df_running_3n['bet']>50]
-            buy_backs_bs = df_running_bs[df_running_bs['bet']>100]
+            buy_backs_3n = df_running_3n[df_running_3n['bet']>buy_back_3n]
+            buy_backs_bs = df_running_bs[df_running_bs['bet']>buy_back_bonus]
             
-            buy_backs_3n['bet'] = buy_backs_3n['bet'].apply(lambda x: x-50)
-            buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-100)
+            buy_backs_3n['bet'] = buy_backs_3n['bet'].apply(lambda x: x-buy_back_3n)
+            buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-buy_back_bonus)
             
             buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
 
@@ -93,7 +93,7 @@ class DataTransformation:
         except Exception as e:
             raise CustomException(e, sys)
     
-    def add_total_bs(self, df_running, df):
+    def add_total_bs(self, df_running, df, buy_back_bonus):
         logging.info("Entered Data Transformation - adding totals")
         try:
             df_running['bet'] = df_running['bet'].apply(lambda x: int(x))
@@ -102,8 +102,8 @@ class DataTransformation:
             
             # df_running_bs = df_running_bs.groupby(0).sum().reset_index()
             
-            buy_backs_bs = df_running_bs[df_running_bs['bet']>100]
-            buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-100)
+            buy_backs_bs = df_running_bs[df_running_bs['bet']>buy_back_bonus]
+            buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-buy_back_bonus)
             
             df.loc['Buy Back'] = [-buy_backs_bs[buy_backs_bs[0]!=0]['bet'].sum(), 0]
             
