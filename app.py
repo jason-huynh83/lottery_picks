@@ -215,26 +215,26 @@ text2
         for row in bonus_df['copy_paste']:
             st.text(row)
             
-    if col5.button("Buy Back", key='buy_back_button'):
-        df_final = DataFinal()
-        to_send, buy_backs = df_final.data_main_3_buyback(data, buy_back_bonus, buy_back_3n)
+    # if col5.button("Buy Back", key='buy_back_button'):
+    #     df_final = DataFinal()
+    #     to_send, buy_backs = df_final.data_main_3_buyback(data, buy_back_bonus, buy_back_3n)
        
-        st.dataframe(to_send, use_container_width=True)
-        csv = convert_df(to_send)
+    #     st.dataframe(to_send, use_container_width=True)
+    #     csv = convert_df(to_send)
         
-        st.download_button(
-            label="Download file",
-            data=csv,
-            file_name=f"{today_str}.csv",
-            mime='text/csv',
-        )
-        st.write('Buy Back Numbers:')
-        for row in buy_backs['copy_paste']:
-            st.text(row)
+    #     st.download_button(
+    #         label="Download file",
+    #         data=csv,
+    #         file_name=f"{today_str}.csv",
+    #         mime='text/csv',
+    #     )
+    #     st.write('Buy Back Numbers:')
+    #     for row in buy_backs['copy_paste']:
+    #         st.text(row)
         
-        st.write('Actual Buy Back')
-        for row in buy_backs['copy_paste_actual']:
-            st.text(row)
+    #     st.write('Actual Buy Back')
+    #     for row in buy_backs['copy_paste_actual']:
+    #         st.text(row)
             
     return data
 

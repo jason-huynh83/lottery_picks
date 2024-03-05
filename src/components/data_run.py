@@ -137,7 +137,8 @@ class DataFinal:
                 to_send, buy_back = data_obj.add_total_bs(final_df1, df, buy_back_bonus)
 
             buy_back = buy_back.replace(0,'')
-            buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
+            buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(val for val in x.iloc[0:5].dropna().astype(str)), axis=1)
+                # x.dropna().astype(str)), axis=1)
             buy_back['copy_paste'] = buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)   
             
             buy_back['copy_paste_actual'] = buy_back[['bets','actual_buying_back']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)   

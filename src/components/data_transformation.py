@@ -48,11 +48,12 @@ class DataTransformation:
             buy_backs_3n['bet'] = buy_backs_3n['bet'].apply(lambda x: x-buy_back_3n)
             buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-buy_back_bonus)
             
-            buy_backs_3n['actual_buying_back'] = buy_back_3n
-            buy_backs_bs['actual_buying_back'] = buy_back_bonus
+            # buy_backs_3n['actual_buying_back'] = buy_back_3n
+            # buy_backs_bs['actual_buying_back'] = buy_back_bonus
             
             buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
-
+            
+            
             df.loc['Buy Back'] = [-buy_backs[buy_backs[1]==0]['bet'].sum(), -buy_backs[buy_backs[1]!=0]['bet'].sum()]
             bs_total = df['bs'].sum() * 0.13
             n_total = df['3n'].sum() * 0.30
