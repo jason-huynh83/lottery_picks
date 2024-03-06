@@ -66,8 +66,7 @@ class DataFinal:
             buy_back = buy_back.replace(0,'')
             buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
             buy_back['copy_paste'] = buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
-            # data_export(to_send, buy_back)
-
+            
             return to_send, buy_back
         
         except Exception as e:
@@ -137,12 +136,12 @@ class DataFinal:
                 to_send, buy_back = data_obj.add_total_bs(final_df1, df, buy_back_bonus)
 
             buy_back = buy_back.replace(0,'')
-            buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(val for val in x.iloc[0:5].dropna().astype(str)), axis=1)
-                # x.dropna().astype(str)), axis=1)
+            buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
             buy_back['copy_paste'] = buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)   
             
-            buy_back['copy_paste_actual'] = buy_back[['bets','actual_buying_back']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)   
-
+            buy_back['actual_buy_back'] = buy_back.apply(lambda x: buy_back_3n if x[1] != '' else buy_back_bonus, axis=1)
+            buy_back['actual_buyback_copy_paste'] = buy_back[['bets','actual_buy_back']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
+            
             return to_send, buy_back
         
         except Exception as e:
