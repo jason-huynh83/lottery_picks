@@ -118,6 +118,7 @@ class DataFinal:
             data_obj = DataTransformation()
             df = pd.DataFrame()
             idx = 0
+            
 
             for index, row in final_df.iterrows():
                 if (row == 0).all():
@@ -129,6 +130,7 @@ class DataFinal:
             df.index = [f'text_{i}' for i in index_df]
             final_df1 = final_df[~final_df[0].isnull()]
 
+            final_df1['bet'] = final_df1['bet'].astype(int)
             
             if len(final_df1.columns) > 2:
                 to_send, buy_back = data_obj.add_totals_2(final_df1, df, buy_back_bonus, buy_back_3n)
@@ -142,7 +144,12 @@ class DataFinal:
             buy_back['actual_buy_back'] = buy_back.apply(lambda x: buy_back_3n if x[1] != '' else buy_back_bonus, axis=1)
             buy_back['actual_buyback_copy_paste'] = buy_back[['bets','actual_buy_back']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
             
-            return to_send, buy_back
+            additional_buy_back = final_df1[final_df1['bet'] < buy_back_3n]
+            additional_buy_back = additional_buy_back.replace(0,'')
+            additional_buy_back['bets'] = additional_buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
+            additional_buy_back['copy_paste'] = additional_buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1) 
+            
+            return to_send, buy_back, additional_buy_back.iloc[:-1,:]
         
         except Exception as e:
             raise CustomException(e, sys)
