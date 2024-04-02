@@ -138,7 +138,7 @@ text2
     with buy_back_3n_toggle:
         buy_back_3n = st.number_input('Buy Back 3n', value=50, key = 'buy_back_3n')
 
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
+    col1, col2, col3, col4, col5, col6 = st.columns([1,1,1,1,1,1])
     
     if col1.button("Submit", key="submit_button"):
         df_final = DataFinal()
@@ -237,8 +237,28 @@ text2
             st.text(row)
         for row in additional_buy_back['copy_paste']:
             st.text(row)
-            
+
+    if col6.button("3 Number X2", key="3n_x2"):
+        
+        buy_back_3n_x2 = data[data.index != 1000]
+        
+        buy_back_3n_x2 = buy_back_3n_x2[buy_back_3n_x2[1] != 0]
+        
+        buy_back_3n_x2 = buy_back_3n_x2.replace(0,'')
+        
+        buy_back_3n_x2['bet'] = buy_back_3n_x2['bet'].astype(int)
+        buy_back_3n_x2['bet'] = buy_back_3n_x2['bet'] * 2
+        
+        buy_back_3n_x2['bets'] = buy_back_3n_x2.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
+        buy_back_3n_x2['copy_paste'] = buy_back_3n_x2[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
+    
+        st.text('3 number X2')
+        for row in buy_back_3n_x2['copy_paste']:
+            st.text(row)
+        
     return data
+
+
 
 def winning_numbers():
     lotto_names = ['Megadice','Daily Grand','Lotto 6/49', 'Lotto Max']

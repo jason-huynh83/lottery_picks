@@ -95,7 +95,7 @@ class DataFinal:
                 to_send, buy_back = data_obj.add_totals_3(final_df1, df)
             else:
                 to_send, buy_back = data_obj.add_total_bs_3(final_df1, df)
-                
+            
             buy_back = buy_back.replace(0,'')
             buy_back = buy_back[pd.to_numeric(buy_back[0], errors='coerce').notna()]
             
@@ -105,7 +105,7 @@ class DataFinal:
             buy_back['copy_paste'] = buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
             
             buy_back['bet'] = pd.to_numeric(buy_back['bet'], errors='coerce').astype(int)
-
+            
             return to_send, buy_back
         
         except Exception as e:
@@ -153,3 +153,4 @@ class DataFinal:
         
         except Exception as e:
             raise CustomException(e, sys)
+    
