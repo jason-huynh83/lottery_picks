@@ -239,7 +239,6 @@ text2
             st.text(row)
 
     if col6.button("3 Number X2", key="3n_x2"):
-        
         buy_back_3n_x2 = data[data.index != 1000]
         
         buy_back_3n_x2 = buy_back_3n_x2[buy_back_3n_x2[1] != 0]
