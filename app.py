@@ -93,7 +93,6 @@ text2
        
         st.dataframe(to_send, use_container_width=True)
         csv = convert_df(to_send)
-        
         st.download_button(
             label="Download file",
             data=csv,
