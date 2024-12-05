@@ -118,7 +118,9 @@ text2
         for i in range(num_lines):
             st.text(f'1-2-{threshold}')
             total_bets -= threshold
-        st.text(f'1-2-{total_bets}')
+            
+        if total_bets != 0:
+            st.text(f'1-2-{total_bets}')
 
     return data
 
