@@ -102,6 +102,23 @@ text2
         st.write('Buy Back Numbers:')
         for row in buy_backs['copy_paste']:
             st.text(row)
+    
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        threshold = st.number_input('Buy back threshold', value = 50)
+
+    with col4:
+        total_bets = st.number_input('Total Bets', value = 500)
+    
+    if st.button('Calculate'):
+        num_lines = int(total_bets / threshold)
+        
+        st.text('649')
+        for i in range(num_lines):
+            st.text(f'1-2-{threshold}')
+            total_bets -= threshold
+        st.text(f'1-2-{total_bets}')
 
     return data
 
