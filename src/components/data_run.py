@@ -132,11 +132,15 @@ class DataFinal:
 
             final_df1['bet'] = final_df1['bet'].astype(int)
             
+            
             if len(final_df1.columns) > 2:
                 to_send, buy_back = data_obj.add_totals_2(final_df1, df, buy_back_bonus, buy_back_3n)
             else:
                 to_send, buy_back = data_obj.add_total_bs(final_df1, df, buy_back_bonus)
 
+            
+
+            
             buy_back = buy_back.replace(0,'')
             buy_back['bets'] = buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
             buy_back['copy_paste'] = buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)   
@@ -148,6 +152,7 @@ class DataFinal:
             additional_buy_back = additional_buy_back.replace(0,'')
             additional_buy_back['bets'] = additional_buy_back.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
             additional_buy_back['copy_paste'] = additional_buy_back[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1) 
+            
             
             return to_send, buy_back, additional_buy_back.iloc[:-1,:]
         

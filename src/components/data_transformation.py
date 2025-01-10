@@ -42,8 +42,8 @@ class DataTransformation:
             
             # df_running_bs = df_running_bs.groupby(0).sum().reset_index()
 
-            buy_backs_3n = df_running_3n[df_running_3n['bet']>buy_back_3n]
-            buy_backs_bs = df_running_bs[df_running_bs['bet']>buy_back_bonus]
+            buy_backs_3n = df_running_3n[df_running_3n['bet']>=buy_back_3n]
+            buy_backs_bs = df_running_bs[df_running_bs['bet']>=buy_back_bonus]
             
             buy_backs_3n['bet'] = buy_backs_3n['bet'].apply(lambda x: x-buy_back_3n)
             buy_backs_bs['bet'] = buy_backs_bs['bet'].apply(lambda x: x-buy_back_bonus)
@@ -53,7 +53,6 @@ class DataTransformation:
             
             buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
             
-            
             df.loc['Buy Back'] = [-buy_backs[buy_backs[1]==0]['bet'].sum(), -buy_backs[buy_backs[1]!=0]['bet'].sum()]
             bs_total = df['bs'].sum() * 0.13
             n_total = df['3n'].sum() * 0.30
@@ -61,7 +60,8 @@ class DataTransformation:
             df.loc['Total'] = df.sum()
             df.loc['Total - 13%/30%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
             df.loc['final_total'] = [np.nan, df.loc['Total - 13%/30%', 'bs'] + df.loc['Total - 13%/30%', '3n']]
-                
+            
+
             return df, buy_backs
         
         except Exception as e:

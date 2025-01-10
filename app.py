@@ -5,7 +5,8 @@ import streamlit as st
 from datetime import datetime
 from src.utils import check_winning_nums, scrape_winning_nums
 import pytz
-import math
+import pandas as pd
+
 
 @st.cache_data
 def convert_df(df):
@@ -101,7 +102,8 @@ text2
         )
         st.write('Buy Back Numbers:')
         for row in buy_backs['copy_paste']:
-            st.text(row)
+            if '$' in row and row.split('$')[1]:
+                st.text(row)
     
     col3, col4 = st.columns(2)
     
@@ -234,6 +236,7 @@ text2
             st.text(row)
             
     if col5.button("Buy Back", key='buy_back_button'):
+
         df_final = DataFinal()
         to_send, buy_backs, additional_buy_back = df_final.data_main_3_buyback(data, buy_back_bonus, buy_back_3n)
        
@@ -247,8 +250,10 @@ text2
             mime='text/csv',
         )
         st.write('Buy Back Numbers:')
+
         for row in buy_backs['copy_paste']:
-            st.text(row)
+            if '$' in row and row.split('$')[1]:
+                st.text(row)
         
         st.write('Actual Buy Back')
         for row in buy_backs['actual_buyback_copy_paste']:
