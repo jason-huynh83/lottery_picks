@@ -281,15 +281,21 @@ text2
     if col7.button('Duplicates', key='print_duplicates'):
         
         duplicates = data[data.index != 1000]
-        df_dup = duplicates[duplicates.duplicated(subset=[0,1,2], keep=False)]
         
+        duplicates = duplicates[(duplicates[3] == 0) & (duplicates[1] != 0) & (duplicates[2] != 0)]
+    
+        df_dup = duplicates[duplicates.duplicated(subset=[0,1,2], keep=False)]
+
         df_dup['bet'] = df_dup['bet'].astype(int)
+        df_dup = df_dup.replace(0,'')
+        
         
         df_dup['bets'] = df_dup.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
         df_dup['copy_paste'] = df_dup[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
         
         st.text('Duplicates:')
-        for row in df_dup['copy_paste']:
+        
+        for row in df_dup['copy_paste'].sort_values():
             st.text(row)
         
     
