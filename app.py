@@ -158,7 +158,7 @@ text2
     with buy_back_3n_toggle:
         buy_back_3n = st.number_input('Buy Back 3n', value=50, key = 'buy_back_3n')
 
-    col1, col2, col3, col4, col5, col6 = st.columns([1,1,1,1,1,1])
+    col1, col2, col3, col4, col5, col6, col7 = st.columns([1,1,1,1,1,1,1])
     
     if col1.button("Submit", key="submit_button"):
         df_final = DataFinal()
@@ -278,7 +278,23 @@ text2
         for row in buy_back_3n_x2['copy_paste']:
             st.text(row)
         
+    if col7.button('Duplicates', key='print_duplicates'):
+        
+        duplicates = data[data.index != 1000]
+        df_dup = duplicates[duplicates.duplicated(subset=[0,1,2], keep=False)]
+        
+        df_dup['bet'] = df_dup['bet'].astype(int)
+        
+        df_dup['bets'] = df_dup.iloc[:,:-1].apply(lambda x: '-'.join(x.dropna().astype(str)), axis=1)
+        df_dup['copy_paste'] = df_dup[['bets','bet']].apply(lambda x: '-$'.join(x.astype(str)), axis=1)
+        
+        st.text('Duplicates:')
+        for row in df_dup['copy_paste']:
+            st.text(row)
+        
+    
     return data
+
 
 
 

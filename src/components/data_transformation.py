@@ -54,12 +54,12 @@ class DataTransformation:
             buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
             
             df.loc['Buy Back'] = [-buy_backs[buy_backs[1]==0]['bet'].sum(), -buy_backs[buy_backs[1]!=0]['bet'].sum()]
-            bs_total = df['bs'].sum() * 0.13
-            n_total = df['3n'].sum() * 0.30
+            bs_total = df['bs'].sum() * 0.12
+            n_total = df['3n'].sum() * 0.25
             
             df.loc['Total'] = df.sum()
-            df.loc['Total - 13%/30%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
-            df.loc['final_total'] = [np.nan, df.loc['Total - 13%/30%', 'bs'] + df.loc['Total - 13%/30%', '3n']]
+            df.loc['Total - 12%/25%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
+            df.loc['final_total'] = [np.nan, df.loc['Total - 12%/25%', 'bs'] + df.loc['Total - 12%/25%', '3n']]
             
 
             return df, buy_backs
@@ -85,12 +85,12 @@ class DataTransformation:
             
             df.loc['Buy Back'] = [-buy_backs[buy_backs[1]==0]['bet'].sum(), -buy_backs[buy_backs[1]!=0]['bet'].sum()]
 
-            bs_total = df['bs'].sum() * 0.13
-            n_total = df['3n'].sum() * 0.30
+            bs_total = df['bs'].sum() * 0.12
+            n_total = df['3n'].sum() * 0.25
             
             df.loc['Total'] = df.sum()
-            df.loc['Total - 13%/30%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
-            df.loc['final_total'] = [np.nan, df.loc['Total - 13%/30%', 'bs'] + df.loc['Total - 13%/30%', '3n']]
+            df.loc['Total - 12%/25%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
+            df.loc['final_total'] = [np.nan, df.loc['Total - 12%/25%', 'bs'] + df.loc['Total - 12%/25%', '3n']]
                 
             return df, buy_backs
         
@@ -111,12 +111,12 @@ class DataTransformation:
             
             df.loc['Buy Back'] = [-buy_backs_bs[buy_backs_bs[0]!=0]['bet'].sum(), 0]
             
-            bs_total = df['bs'].sum() * 0.13
-            n_total = df['3n'].sum() * 0.30
+            bs_total = df['bs'].sum() * 0.12
+            n_total = df['3n'].sum() * 0.25
             
             df.loc['Total'] = df.sum()
-            df.loc['Total - 13%/30%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
-            df.loc['final_total'] = [np.nan, df.loc['Total - 13%/30%', 'bs'] + df.loc['Total - 13%/30%', '3n']]
+            df.loc['Total - 12%/25%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
+            df.loc['final_total'] = [np.nan, df.loc['Total - 12%/25%', 'bs'] + df.loc['Total - 12%/25%', '3n']]
             
             return df, buy_backs_bs
         
@@ -138,12 +138,12 @@ class DataTransformation:
             
             df.loc['Buy Back'] = [-buy_backs_bs[buy_backs_bs[0]!=0]['bet'].sum(), 0]
             
-            bs_total = df['bs'].sum() * 0.13
-            n_total = df['3n'].sum() * 0.30
+            bs_total = df['bs'].sum() * 0.12
+            n_total = df['3n'].sum() * 0.25
             
             df.loc['Total'] = df.sum()
             df.loc['Total - 13%/30%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
-            df.loc['final_total'] = [np.nan, df.loc['Total - 13%/30%', 'bs'] + df.loc['Total - 13%/30%', '3n']]
+            df.loc['final_total'] = [np.nan, df.loc['Total - 12%/25%', 'bs'] + df.loc['Total - 12%/25%', '3n']]
             
             return df, buy_backs_bs
         
