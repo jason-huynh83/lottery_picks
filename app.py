@@ -282,7 +282,8 @@ text2
         
         duplicates = data[data.index != 1000]
         
-        duplicates = duplicates[(duplicates[3] == 0) & (duplicates[1] != 0) & (duplicates[2] != 0)]
+        if len(duplicates.columns) > 4:
+            duplicates = duplicates[(duplicates[3] == 0) & (duplicates[1] != 0) & (duplicates[2] != 0)]
     
         df_dup = duplicates[duplicates.duplicated(subset=[0,1,2], keep=False)]
 
@@ -297,12 +298,8 @@ text2
         
         for row in df_dup['copy_paste'].sort_values():
             st.text(row)
-        
-    
+
     return data
-
-
-
 
 def winning_numbers():
     lotto_names = ['Megadice','Daily Grand','Lotto 6/49', 'Lotto Max']
