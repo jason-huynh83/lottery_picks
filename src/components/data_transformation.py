@@ -32,7 +32,7 @@ class DataTransformation:
         except Exception as e:
             raise CustomException(e, sys)
         
-    def add_totals_2(self, df_running, df, buy_back_bonus, buy_back_3n):
+    def add_totals_2(self, df_running, df, buy_back_bonus, buy_back_3n, bb_bonus_perct, bb_3n_perct):
         logging.info("Entered Data Transformation - adding totals")
         try:
             df_running['bet'] = df_running['bet'].apply(lambda x: int(x))
@@ -54,12 +54,12 @@ class DataTransformation:
             buy_backs = pd.concat([buy_backs_3n, buy_backs_bs], axis=0)
             
             df.loc['Buy Back'] = [-buy_backs[buy_backs[1]==0]['bet'].sum(), -buy_backs[buy_backs[1]!=0]['bet'].sum()]
-            bs_total = df['bs'].sum() * 0.12
-            n_total = df['3n'].sum() * 0.25
+            bs_total = df['bs'].sum() * bb_bonus_perct
+            n_total = df['3n'].sum() * bb_3n_perct
             
             df.loc['Total'] = df.sum()
-            df.loc['Total - 12%/25%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
-            df.loc['final_total'] = [np.nan, df.loc['Total - 12%/25%', 'bs'] + df.loc['Total - 12%/25%', '3n']]
+            df.loc[f"Total - {bb_bonus_perct:.1%}/{bb_3n_perct:.1%}"] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
+            df.loc['final_total'] = [np.nan, df.loc[f"Total - {bb_bonus_perct:.1%}/{bb_3n_perct:.1%}", 'bs'] + df.loc[f"Total - {bb_bonus_perct:.1%}/{bb_3n_perct:.1%}", '3n']]
             
 
             return df, buy_backs
@@ -97,7 +97,7 @@ class DataTransformation:
         except Exception as e:
             raise CustomException(e, sys)
     
-    def add_total_bs(self, df_running, df, buy_back_bonus):
+    def add_total_bs(self, df_running, df, buy_back_bonus, bb_bonus_perct, bb_3n_perct):
         logging.info("Entered Data Transformation - adding totals")
         try:
             df_running['bet'] = df_running['bet'].apply(lambda x: int(x))
@@ -111,12 +111,12 @@ class DataTransformation:
             
             df.loc['Buy Back'] = [-buy_backs_bs[buy_backs_bs[0]!=0]['bet'].sum(), 0]
             
-            bs_total = df['bs'].sum() * 0.12
-            n_total = df['3n'].sum() * 0.25
+            bs_total = df['bs'].sum() * bb_bonus_perct
+            n_total = df['3n'].sum() * bb_3n_perct
             
             df.loc['Total'] = df.sum()
-            df.loc['Total - 12%/25%'] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
-            df.loc['final_total'] = [np.nan, df.loc['Total - 12%/25%', 'bs'] + df.loc['Total - 12%/25%', '3n']]
+            df.loc[f"Total - {bb_bonus_perct:.1%}/{bb_3n_perct:.1%}"] = [df.loc['Total','bs']-bs_total, df.loc['Total','3n']-n_total]
+            df.loc['final_total'] = [np.nan, df.loc[f"Total - {bb_bonus_perct:.1%}/{bb_3n_perct:.1%}", 'bs'] + df.loc[f"Total - {bb_bonus_perct:.1%}/{bb_3n_perct:.1%}", '3n']]
             
             return df, buy_backs_bs
         

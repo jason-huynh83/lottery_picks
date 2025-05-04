@@ -77,6 +77,24 @@ text2
     data_ingestion_obj = DataIngestion('numbers.txt')
     data = data_ingestion_obj.text_to_df(user_input)
     
+    # Initialize default values if not already set
+    if 'bb_bonus_perct' not in st.session_state:
+        st.session_state.bb_bonus_perct = 0.12  # Default to 12.5%
+    if 'bb_3n_perct' not in st.session_state:
+        st.session_state.bb_3n_perct = 0.25      # Default to 25%
+
+    button_12, button_25 = st.columns(2)
+
+    with button_12:
+        if st.button('12%/25% (Wed, Sat, Sun)'):
+            st.session_state.bb_bonus_perct = 0.12
+            st.session_state.bb_3n_perct = 0.25
+
+    with button_25:
+        if st.button('13%/30% (Mon, Tues, Thurs, Fri)'):
+            st.session_state.bb_bonus_perct = 0.13
+            st.session_state.bb_3n_perct = 0.30
+    
     col1, col2 = st.columns(2)
 
     # Adding number input widgets in the columns
@@ -90,7 +108,7 @@ text2
     if st.button("Enter"):
     
         df_final = DataFinal()
-        to_send, buy_backs = df_final.data_main_2(data, buy_back_bonus, buy_back_3n)
+        to_send, buy_backs = df_final.data_main_2(data, buy_back_bonus, buy_back_3n, st.session_state.bb_bonus_perct, st.session_state.bb_3n_perct)
        
         st.dataframe(to_send, use_container_width=True)
         csv = convert_df(to_send)
