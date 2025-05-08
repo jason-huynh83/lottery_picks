@@ -17,10 +17,10 @@ def main():
     tz = pytz.timezone('US/Eastern')
     today = datetime.now(tz)
     today_str = today.strftime('%B-%d-%Y')
-    st.title(f"Uncle Kevin Lotto App: {today_str}")
+    st.title(f"🎯 Uncle Kevin Lotto App")
+    st.caption(f"Today's Date: {today_str}")
     
     # Text area for user input
-
     user_input = st.text_area("Uncle Kevin Enter lotto bets here:", 
                               placeholder="""Please follow format:
 text1

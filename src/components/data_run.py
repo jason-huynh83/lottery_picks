@@ -134,7 +134,7 @@ class DataFinal:
             
             
             if len(final_df1.columns) > 2:
-                to_send, buy_back = data_obj.add_totals_2(final_df1, df, buy_back_bonus, buy_back_3n)
+                to_send, buy_back = data_obj.add_totals_2(final_df1, df, buy_back_bonus, buy_back_3n, 0.12, 0.25)
             else:
                 to_send, buy_back = data_obj.add_total_bs(final_df1, df, buy_back_bonus)
 
