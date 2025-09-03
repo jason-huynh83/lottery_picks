@@ -5,6 +5,7 @@ from datetime import datetime
 from src.utils import check_winning_nums, scrape_winning_nums
 import pytz
 import pandas as pd
+import plotly.graph_objects as go
 
 @st.cache_data
 def convert_df(df):
@@ -238,6 +239,243 @@ text2
         winners = check_winning_nums(data, winning_nums, bs)
         st.write(winners)
 
+YEARS_DEFAULT = (2024, 2025)
+
+# ---------- Shared helpers ----------
+def _prep_overall_pivot(df: pd.DataFrame, years=YEARS_DEFAULT):
+    """Prepare month-day aligned cumulative pivot for overall (all rows)."""
+    d = df.copy()
+    d["Day"] = pd.to_datetime(d["Day"])
+    d["Year"] = d["Day"].dt.year
+    d["MonthDay"] = d["Day"].dt.strftime("%m-%d")
+    d = d[d["Year"].isin(years)].copy()
+    d = d[d["MonthDay"] != "02-29"]  # drop leap day
+
+    daily = (
+        d.groupby(["Year", "Day"], as_index=False)["Earnings"]
+         .sum()
+         .sort_values(["Year", "Day"])
+    )
+    daily["CumEarnings"] = daily.groupby("Year")["Earnings"].cumsum()
+    daily["MonthDay"] = daily["Day"].dt.strftime("%m-%d")
+
+    pivot = (
+        daily.pivot_table(index="MonthDay", columns="Year", values="CumEarnings", aggfunc="last")
+             .sort_index()
+    )
+
+    # full calendar index (no Feb 29)
+    all_md = pd.date_range("2000-01-01", "2000-12-31", freq="D")
+    all_md = all_md[~((all_md.month == 2) & (all_md.day == 29))]
+    all_idx = all_md.strftime("%m-%d")
+    pivot = pivot.reindex(all_idx)
+
+    y_prev, y_cur = min(years), max(years)
+    pivot["YoY_Diff"] = pivot.get(y_cur) - pivot.get(y_prev)
+
+    # x-axis with dummy year for clean month labels
+    x_dt = pd.to_datetime("2000-" + pivot.index)
+    return x_dt, pivot, y_prev, y_cur
+
+
+def _prepare_pivot_for_dim(df_in: pd.DataFrame, dim_col: str, dim_value, years=YEARS_DEFAULT):
+    """Prepare month-day aligned cumulative pivot for a single dim value (e.g., Weekday='Mon')."""
+    d = df_in.copy()
+    d["Day"] = pd.to_datetime(d["Day"])
+    d["Year"] = d["Day"].dt.year
+    d["MonthDay"] = d["Day"].dt.strftime("%m-%d")
+    d = d[(d[dim_col] == dim_value) & (d["Year"].isin(years))].copy()
+    if d.empty:
+        return None, None, None, None
+
+    d = d[d["MonthDay"] != "02-29"]
+
+    daily = (
+        d.groupby(["Year", "Day"], as_index=False)["Earnings"]
+         .sum()
+         .sort_values(["Year", "Day"])
+    )
+    if daily.empty:
+        return None, None, None, None
+
+    daily["CumEarnings"] = daily.groupby("Year")["Earnings"].cumsum()
+    daily["MonthDay"] = daily["Day"].dt.strftime("%m-%d")
+
+    pivot = (
+        daily.pivot_table(index="MonthDay", columns="Year", values="CumEarnings", aggfunc="last")
+             .sort_index()
+    )
+
+    all_md = pd.date_range("2000-01-01", "2000-12-31", freq="D")
+    all_md = all_md[~((all_md.month == 2) & (all_md.day == 29))]
+    idx = all_md.strftime("%m-%d")
+    pivot = pivot.reindex(idx)
+
+    # start at 0 then forward-fill within each year
+    y_prev, y_cur = min(years), max(years)
+    for y in years:
+        if y not in pivot.columns:
+            pivot[y] = np.nan
+        if pd.isna(pivot.iloc[0][y]):
+            pivot.iloc[0, pivot.columns.get_loc(y)] = 0.0
+        pivot[y] = pivot[y].ffill()
+
+    pivot["YoY_Diff"] = pivot[y_cur] - pivot[y_prev]
+    x_dt = pd.to_datetime("2000-" + pivot.index)
+    return x_dt, pivot, y_prev, y_cur
+
+
+# ---------- Public: figures you can call in tab4 ----------
+def make_yoy_overlay_fig(df: pd.DataFrame, years=YEARS_DEFAULT, title_prefix="Running Totals of Earnings — YoY Overlay"):
+    """Overall 2024 vs 2025 overlay + YoY Δ on secondary axis. Returns a Plotly Figure."""
+    x_dt, pivot, y_prev, y_cur = _prep_overall_pivot(df, years=years)
+
+    fig = go.Figure()
+    if y_prev in pivot.columns:
+        fig.add_trace(go.Scatter(
+            x=x_dt, y=pivot[y_prev], mode="lines", name=str(y_prev),
+            hovertemplate="%{x|%b %d}: $" + "%{y:,.0f}<extra>" + str(y_prev) + "</extra>"
+        ))
+    if y_cur in pivot.columns:
+        fig.add_trace(go.Scatter(
+            x=x_dt, y=pivot[y_cur], mode="lines", name=str(y_cur),
+            hovertemplate="%{x|%b %d}: $" + "%{y:,.0f}<extra>" + str(y_cur) + "</extra>"
+        ))
+    fig.add_trace(go.Scatter(
+        x=x_dt, y=pivot["YoY_Diff"], mode="lines",
+        name=f"YoY Δ ({y_cur}-{y_prev})",
+        line=dict(dash="dot"),
+        yaxis="y2",
+        hovertemplate="%{x|%b %d}: $" + "%{y:,.0f}<extra>YoY Δ</extra>"
+    ))
+
+    fig.update_layout(
+        title=f"{title_prefix} ({y_cur} vs {y_prev})",
+        xaxis=dict(title="Month", tickformat="%b", rangeslider=dict(visible=True)),
+        yaxis=dict(title="Cumulative Earnings"),
+        yaxis2=dict(title="YoY Δ (Cumulative)", overlaying="y", side="right", showgrid=False),
+        legend=dict(title="Series"),
+        hovermode="x unified",
+        margin=dict(l=70, r=70, t=80, b=50),
+        height=600,
+    )
+    return fig
+
+
+def make_yoy_dropdown_by_weekday(df: pd.DataFrame, years=YEARS_DEFAULT,
+                                 title_prefix="Running Totals — YoY Overlay"):
+    """Dropdown to toggle each Weekday; shows prev year, current year, and YoY Δ."""
+    values = [v for v in sorted(df["Weekday"].dropna().unique())]
+    traces, valid_values = [], []
+    for i, val in enumerate(values):
+        res = _prepare_pivot_for_dim(df, "Weekday", val, years=years)
+        x_dt, pv, y_prev, y_cur = res
+        if pv is None:
+            continue
+        valid_values.append(val)
+        first = (len(valid_values) == 1)
+        traces.extend([
+            go.Scatter(x=x_dt, y=pv[y_prev], mode="lines", name=f"{y_prev}", visible=first),
+            go.Scatter(x=x_dt, y=pv[y_cur],  mode="lines", name=f"{y_cur}",  visible=first),
+            go.Scatter(x=x_dt, y=pv["YoY_Diff"], mode="lines",
+                       name=f"YoY Δ ({y_cur}-{y_prev})", line=dict(dash="dot"),
+                       visible=first, yaxis="y2"),
+        ])
+    if not valid_values:
+        raise ValueError("No data for Weekday dropdown.")
+
+    # visibility masks (3 traces per option)
+    def vis_mask(idx):
+        return sum(([i == idx]*3 for i in range(len(valid_values))), [])
+
+    buttons = [
+        dict(
+            label=str(val),
+            method="update",
+            args=[{"visible": vis_mask(i)},
+                  {"title": f"{title_prefix} ({years[1]} vs {years[0]}) — Weekday: {val}"}],
+        )
+        for i, val in enumerate(valid_values)
+    ]
+
+    fig = go.Figure(traces)
+    fig.update_layout(
+        title=f"{title_prefix} ({years[1]} vs {years[0]}) — Weekday: {valid_values[0]}",
+        xaxis=dict(tickformat="%b", title="Month"),
+        yaxis=dict(title="Cumulative Earnings"),
+        yaxis2=dict(title="YoY Δ (Cumulative)", overlaying="y", side="right", showgrid=False),
+        legend=dict(title="Series"),
+        hovermode="x unified",
+        updatemenus=[dict(type="dropdown", x=1.02, xanchor="left", y=1.10, yanchor="top",
+                          buttons=buttons, direction="down", showactive=True)],
+        margin=dict(l=70, r=70, t=80, b=50),
+        height=600,
+    )
+    return fig
+
+
+def make_yoy_dropdown_by_lotto_type(df: pd.DataFrame, years=YEARS_DEFAULT,
+                                    title_prefix="Running Totals — YoY Overlay"):
+    """Dropdown to toggle each lotto_type; shows prev year, current year, and YoY Δ."""
+    values = [v for v in sorted(df["lotto_type"].dropna().unique())]
+    traces, valid_values = [], []
+    for i, val in enumerate(values):
+        res = _prepare_pivot_for_dim(df, "lotto_type", val, years=years)
+        x_dt, pv, y_prev, y_cur = res
+        if pv is None:
+            continue
+        valid_values.append(val)
+        first = (len(valid_values) == 1)
+        traces.extend([
+            go.Scatter(x=x_dt, y=pv[y_prev], mode="lines", name=f"{y_prev}", visible=first),
+            go.Scatter(x=x_dt, y=pv[y_cur],  mode="lines", name=f"{y_cur}",  visible=first),
+            go.Scatter(x=x_dt, y=pv["YoY_Diff"], mode="lines",
+                       name=f"YoY Δ ({y_cur}-{y_prev})", line=dict(dash="dot"),
+                       visible=first, yaxis="y2"),
+        ])
+    if not valid_values:
+        raise ValueError("No data for lotto_type dropdown.")
+
+    def vis_mask(idx):
+        return sum(([i == idx]*3 for i in range(len(valid_values))), [])
+
+    buttons = [
+        dict(
+            label=str(val),
+            method="update",
+            args=[{"visible": vis_mask(i)},
+                  {"title": f"{title_prefix} ({years[1]} vs {years[0]}) — lotto_type: {val}"}],
+        )
+        for i, val in enumerate(valid_values)
+    ]
+
+    fig = go.Figure(traces)
+    fig.update_layout(
+        title=f"{title_prefix} ({years[1]} vs {years[0]}) — lotto_type: {valid_values[0]}",
+        xaxis=dict(tickformat="%b", title="Month"),
+        yaxis=dict(title="Cumulative Earnings"),
+        yaxis2=dict(title="YoY Δ (Cumulative)", overlaying="y", side="right", showgrid=False),
+        legend=dict(title="Series"),
+        hovermode="x unified",
+        updatemenus=[dict(type="dropdown", x=1.02, xanchor="left", y=1.10, yanchor="top",
+                          buttons=buttons, direction="down", showactive=True)],
+        margin=dict(l=70, r=70, t=80, b=50),
+        height=600,
+    )
+    return fig
+def lotto_type(weekday):
+    if weekday == 'Wednesday' or weekday == 'Saturday':
+        return 'md/649'
+    elif weekday == 'Thursday' or weekday == 'Monday':
+        return 'md/grand'
+    elif weekday == 'Friday' or weekday == 'Tuesday':
+        return 'md/max'
+    elif weekday == 'Sunday':
+        return 'md'
+    else:
+        return None
+
+
 def main():
     tz = pytz.timezone('US/Eastern')
     today = datetime.now(tz)
@@ -254,7 +492,30 @@ def main():
     with tab3:
         main_3()
     with tab4:
-        st.write('📌 TBD: Coming Soon')
+        df = pd.read_csv('Run Dat - Master Raw.csv')
+        df = df.copy()
+        df["Day"] = pd.to_datetime(df["Day"], errors="coerce")
+
+        # robust currency-to-float cleaner
+        df["Earnings"] = (
+            df["Earnings"]
+            .astype(str)
+            .str.replace(r"[^\d\-\.\(\)]", "", regex=True)      # strip $, commas, spaces
+            .str.replace(r"^\((.*)\)$", r"-\1", regex=True)      # (123.45) -> -123.45
+        )
+        df["Earnings"] = pd.to_numeric(df["Earnings"], errors="coerce").fillna(0.0)
+        df['lotto_type'] = df['Weekday'].apply(lotto_type)
+        st.subheader("YoY Overview")
+        fig_overall = make_yoy_overlay_fig(df, years=(2024, 2025))
+        st.plotly_chart(fig_overall, use_container_width=True)
+
+        st.subheader("YoY by Weekday")
+        fig_weekday = make_yoy_dropdown_by_weekday(df, years=(2024, 2025))
+        st.plotly_chart(fig_weekday, use_container_width=True)
+
+        st.subheader("YoY by lotto_type")
+        fig_lotto = make_yoy_dropdown_by_lotto_type(df, years=(2024, 2025))
+        st.plotly_chart(fig_lotto, use_container_width=True)
 
 if __name__ == "__main__":
     main()

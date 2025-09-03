@@ -6,4 +6,5 @@ streamlit
 openpyxl
 lxml
 bs4
+plotly
 -e .
