@@ -474,6 +474,10 @@ def lotto_type(weekday):
         return 'md'
     else:
         return None
+    
+def load_master_from_public_gsheet(spreadsheet_id: str, gid: str) -> pd.DataFrame:
+    url = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv&gid={gid}"
+    return pd.read_csv(url)
 
 
 def main():
@@ -492,7 +496,7 @@ def main():
     with tab3:
         main_3()
     with tab4:
-        df = pd.read_csv('Run Dat - Master Raw.csv')
+        df = load_master_from_public_gsheet("11UQYJadXLZ-ZwE-7mqTDX5tfkPgyJUH0ZLyodTViTLM", "2075169032")
         df = df.copy()
         df["Day"] = pd.to_datetime(df["Day"], errors="coerce")
 
