@@ -6,6 +6,7 @@ from src.utils import check_winning_nums, scrape_winning_nums
 import pytz
 import pandas as pd
 import plotly.graph_objects as go
+import numpy as np
 
 @st.cache_data
 def convert_df(df):
@@ -362,38 +363,62 @@ def make_yoy_overlay_fig(df: pd.DataFrame, years=YEARS_DEFAULT, title_prefix="Ru
     return fig
 
 
-def make_yoy_dropdown_by_weekday(df: pd.DataFrame, years=YEARS_DEFAULT,
-                                 title_prefix="Running Totals — YoY Overlay"):
+def make_yoy_dropdown_by_weekday(
+    df: pd.DataFrame,
+    years=YEARS_DEFAULT,
+    title_prefix="Running Totals — YoY Overlay"
+):
     """Dropdown to toggle each Weekday; shows prev year, current year, and YoY Δ."""
     values = [v for v in sorted(df["Weekday"].dropna().unique())]
     traces, valid_values = [], []
-    for i, val in enumerate(values):
-        res = _prepare_pivot_for_dim(df, "Weekday", val, years=years)
-        x_dt, pv, y_prev, y_cur = res
+
+    for val in values:
+        x_dt, pv, y_prev, y_cur = _prepare_pivot_for_dim(df, "Weekday", val, years=years)
         if pv is None:
             continue
+
         valid_values.append(val)
         first = (len(valid_values) == 1)
+
+        # Real dates for hover
+        prev_real_dates = pd.to_datetime([f"{y_prev}-{md}" for md in pv.index])
+        cur_real_dates  = pd.to_datetime([f"{y_cur}-{md}"  for md in pv.index])
+
         traces.extend([
-            go.Scatter(x=x_dt, y=pv[y_prev], mode="lines", name=f"{y_prev}", visible=first),
-            go.Scatter(x=x_dt, y=pv[y_cur],  mode="lines", name=f"{y_cur}",  visible=first),
-            go.Scatter(x=x_dt, y=pv["YoY_Diff"], mode="lines",
-                       name=f"YoY Δ ({y_cur}-{y_prev})", line=dict(dash="dot"),
-                       visible=first, yaxis="y2"),
+            go.Scatter(
+                x=x_dt, y=pv[y_prev], mode="lines",
+                name=f"{y_prev}", visible=first,
+                customdata=prev_real_dates,
+                hovertemplate="%{customdata|%a, %b %d, %Y}<br>$%{y:,.0f}<extra>" + str(y_prev) + "</extra>",
+            ),
+            go.Scatter(
+                x=x_dt, y=pv[y_cur], mode="lines",
+                name=f"{y_cur}", visible=first,
+                customdata=cur_real_dates,
+                hovertemplate="%{customdata|%a, %b %d, %Y}<br>$%{y:,.0f}<extra>" + str(y_cur) + "</extra>",
+            ),
+            go.Scatter(
+                x=x_dt, y=pv["YoY_Diff"], mode="lines",
+                name=f"YoY Δ ({y_cur}-{y_prev})", line=dict(dash="dot"),
+                visible=first, yaxis="y2",
+                hovertemplate="%{x|%b %d} — YoY Δ<br>$%{y:,.0f}<extra>YoY</extra>",
+            ),
         ])
+
     if not valid_values:
         raise ValueError("No data for Weekday dropdown.")
 
-    # visibility masks (3 traces per option)
     def vis_mask(idx):
-        return sum(([i == idx]*3 for i in range(len(valid_values))), [])
+        return sum(([i == idx] * 3 for i in range(len(valid_values))), [])
 
     buttons = [
         dict(
             label=str(val),
             method="update",
-            args=[{"visible": vis_mask(i)},
-                  {"title": f"{title_prefix} ({years[1]} vs {years[0]}) — Weekday: {val}"}],
+            args=[
+                {"visible": vis_mask(i)},
+                {"title": f"{title_prefix} ({years[1]} vs {years[0]}) — Weekday: {val}"}
+            ],
         )
         for i, val in enumerate(valid_values)
     ]
@@ -406,45 +431,73 @@ def make_yoy_dropdown_by_weekday(df: pd.DataFrame, years=YEARS_DEFAULT,
         yaxis2=dict(title="YoY Δ (Cumulative)", overlaying="y", side="right", showgrid=False),
         legend=dict(title="Series"),
         hovermode="x unified",
-        updatemenus=[dict(type="dropdown", x=1.02, xanchor="left", y=1.10, yanchor="top",
-                          buttons=buttons, direction="down", showactive=True)],
+        hoverlabel=dict(namelength=-1),
+        updatemenus=[dict(
+            type="dropdown", x=1.02, xanchor="left", y=1.10, yanchor="top",
+            buttons=buttons, direction="down", showactive=True
+        )],
         margin=dict(l=70, r=70, t=80, b=50),
         height=600,
     )
     return fig
 
 
-def make_yoy_dropdown_by_lotto_type(df: pd.DataFrame, years=YEARS_DEFAULT,
-                                    title_prefix="Running Totals — YoY Overlay"):
+def make_yoy_dropdown_by_lotto_type(
+    df: pd.DataFrame,
+    years=YEARS_DEFAULT,
+    title_prefix="Running Totals — YoY Overlay"
+):
     """Dropdown to toggle each lotto_type; shows prev year, current year, and YoY Δ."""
     values = [v for v in sorted(df["lotto_type"].dropna().unique())]
     traces, valid_values = [], []
-    for i, val in enumerate(values):
-        res = _prepare_pivot_for_dim(df, "lotto_type", val, years=years)
-        x_dt, pv, y_prev, y_cur = res
+
+    for val in values:
+        x_dt, pv, y_prev, y_cur = _prepare_pivot_for_dim(df, "lotto_type", val, years=years)
         if pv is None:
             continue
+
         valid_values.append(val)
         first = (len(valid_values) == 1)
+
+        # Real dates for hover
+        prev_real_dates = pd.to_datetime([f"{y_prev}-{md}" for md in pv.index])
+        cur_real_dates  = pd.to_datetime([f"{y_cur}-{md}"  for md in pv.index])
+
         traces.extend([
-            go.Scatter(x=x_dt, y=pv[y_prev], mode="lines", name=f"{y_prev}", visible=first),
-            go.Scatter(x=x_dt, y=pv[y_cur],  mode="lines", name=f"{y_cur}",  visible=first),
-            go.Scatter(x=x_dt, y=pv["YoY_Diff"], mode="lines",
-                       name=f"YoY Δ ({y_cur}-{y_prev})", line=dict(dash="dot"),
-                       visible=first, yaxis="y2"),
+            go.Scatter(
+                x=x_dt, y=pv[y_prev], mode="lines",
+                name=f"{y_prev}", visible=first,
+                customdata=prev_real_dates,
+                hovertemplate="%{customdata|%a, %b %d, %Y}<br>$%{y:,.0f}<extra>" + str(y_prev) + "</extra>",
+            ),
+            go.Scatter(
+                x=x_dt, y=pv[y_cur], mode="lines",
+                name=f"{y_cur}", visible=first,
+                customdata=cur_real_dates,
+                hovertemplate="%{customdata|%a, %b %d, %Y}<br>$%{y:,.0f}<extra>" + str(y_cur) + "</extra>",
+            ),
+            go.Scatter(
+                x=x_dt, y=pv["YoY_Diff"], mode="lines",
+                name=f"YoY Δ ({y_cur}-{y_prev})", line=dict(dash="dot"),
+                visible=first, yaxis="y2",
+                hovertemplate="%{x|%b %d} — YoY Δ<br>$%{y:,.0f}<extra>YoY</extra>",
+            ),
         ])
+
     if not valid_values:
         raise ValueError("No data for lotto_type dropdown.")
 
     def vis_mask(idx):
-        return sum(([i == idx]*3 for i in range(len(valid_values))), [])
+        return sum(([i == idx] * 3 for i in range(len(valid_values))), [])
 
     buttons = [
         dict(
             label=str(val),
             method="update",
-            args=[{"visible": vis_mask(i)},
-                  {"title": f"{title_prefix} ({years[1]} vs {years[0]}) — lotto_type: {val}"}],
+            args=[
+                {"visible": vis_mask(i)},
+                {"title": f"{title_prefix} ({years[1]} vs {years[0]}) — lotto_type: {val}"}
+            ],
         )
         for i, val in enumerate(valid_values)
     ]
@@ -457,12 +510,16 @@ def make_yoy_dropdown_by_lotto_type(df: pd.DataFrame, years=YEARS_DEFAULT,
         yaxis2=dict(title="YoY Δ (Cumulative)", overlaying="y", side="right", showgrid=False),
         legend=dict(title="Series"),
         hovermode="x unified",
-        updatemenus=[dict(type="dropdown", x=1.02, xanchor="left", y=1.10, yanchor="top",
-                          buttons=buttons, direction="down", showactive=True)],
+        hoverlabel=dict(namelength=-1),
+        updatemenus=[dict(
+            type="dropdown", x=1.02, xanchor="left", y=1.10, yanchor="top",
+            buttons=buttons, direction="down", showactive=True
+        )],
         margin=dict(l=70, r=70, t=80, b=50),
         height=600,
     )
     return fig
+
 def lotto_type(weekday):
     if weekday == 'Wednesday' or weekday == 'Saturday':
         return 'md/649'
